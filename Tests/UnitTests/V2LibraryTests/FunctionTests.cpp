@@ -872,7 +872,7 @@ void CheckFindNameResultInSet(std::vector<FunctionPtr> actual, std::wstring expe
 std::vector<FunctionPtr> FindAllWithOpType(const FunctionPtr& rootFunction, const PrimitiveOpType& type, bool nestedSearchInsideBlockFunction = false)
 {
     std::vector<FunctionPtr> foundFunctions;
-    rootFunction->FindByMatch([&foundFunctions, &type](const FunctionPtr& function) {
+    rootFunction->PreorderTraverse([&foundFunctions, &type](const FunctionPtr& function) {
         if (function->IsPrimitive())
         {
             auto primitive = std::static_pointer_cast<PrimitiveFunction>(function);
@@ -886,7 +886,7 @@ std::vector<FunctionPtr> FindAllWithOpType(const FunctionPtr& rootFunction, cons
     return foundFunctions;
 }
 
-void TestFindByMatch(const DeviceDescriptor& device)
+void TestPreorderTraverse(const DeviceDescriptor& device)
 {
     size_t inputDim = 10;
     size_t outputDim = 20;
@@ -1153,10 +1153,10 @@ void SetRandomSeed(const DeviceDescriptor& device)
 
 BOOST_AUTO_TEST_SUITE(FunctionSuite)
 
-BOOST_AUTO_TEST_CASE(FindByMatchInCPU)
+BOOST_AUTO_TEST_CASE(PreoderTraverseInCPU)
 {
     if (ShouldRunOnCpu())
-        TestFindByMatch(DeviceDescriptor::CPUDevice());
+        TestPreorderTraverse(DeviceDescriptor::CPUDevice());
 }
 
 BOOST_AUTO_TEST_CASE(FindNameInCPU)

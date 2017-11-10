@@ -3389,7 +3389,7 @@ namespace CNTK
         ///  A wrapper for PreorderTraverseFunctions.
         ///
         template <typename FunctionType>
-        void FindByMatch(const FunctionType& functor, bool traverseInsideBlockFunction = false)
+        void PreorderTraverse(const FunctionType& functor, bool traverseInsideBlockFunction = false)
         {
             PreorderTraverseFunctions(RootFunction(), functor, traverseInsideBlockFunction);
         }
@@ -3564,17 +3564,19 @@ namespace CNTK
 
             if (rootFunction->IsComposite())
                 PreorderTraverseFunctions(rootFunction->RootFunction(), visitedFunctions, functor, traverseInsideBlockFunction);
-
-            if (traverseInsideBlockFunction && rootFunction->IsBlock())
-                PreorderTraverseFunctions(rootFunction->BlockRoot(), visitedFunctions, functor, traverseInsideBlockFunction);
-
-            std::vector<Variable> rootFunctionInputs = rootFunction->Inputs();
-            for (const auto& rootInput : rootFunctionInputs)
+            else
             {
-                if (rootInput.IsOutput() && visitedFunctions.find(rootInput.Owner()) == visitedFunctions.end())
+                if (traverseInsideBlockFunction && rootFunction->IsBlock())
+                    PreorderTraverseFunctions(rootFunction->BlockRoot(), visitedFunctions, functor, traverseInsideBlockFunction);
+
+                std::vector<Variable> rootFunctionInputs = rootFunction->Inputs();
+                for (const auto& rootInput : rootFunctionInputs)
                 {
-                    const auto& function = rootInput.Owner();
-                    PreorderTraverseFunctions(function, visitedFunctions, functor, traverseInsideBlockFunction);
+                    if (rootInput.IsOutput() && visitedFunctions.find(rootInput.Owner()) == visitedFunctions.end())
+                    {
+                        const auto& function = rootInput.Owner();
+                        PreorderTraverseFunctions(function, visitedFunctions, functor, traverseInsideBlockFunction);
+                    }
                 }
             }
         }
