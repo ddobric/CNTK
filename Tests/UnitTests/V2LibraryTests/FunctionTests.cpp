@@ -869,47 +869,6 @@ void CheckFindNameResultInSet(std::vector<FunctionPtr> actual, std::wstring expe
         ReportFailure("Cannot find function '%S'", expectedName.c_str());
 }
 
-std::vector<FunctionPtr> FindAllWithOpType(const FunctionPtr& rootFunction, const PrimitiveOpType& type, bool nestedSearchInsideBlockFunction = false)
-{
-    std::vector<FunctionPtr> foundFunctions;
-    rootFunction->PreorderTraverse([&foundFunctions, &type](const FunctionPtr& function) {
-        if (function->IsPrimitive())
-        {
-            auto primitive = std::static_pointer_cast<PrimitiveFunction>(function);
-            if (primitive->OpType() == type)
-            {
-                foundFunctions.push_back(function);
-            }
-
-        }
-    }, nestedSearchInsideBlockFunction);
-    return foundFunctions;
-}
-
-void TestPreorderTraverse(const DeviceDescriptor& device)
-{
-    size_t inputDim = 10;
-    size_t outputDim = 20;
-    const std::wstring timesFuncName = L"TimesFunc";
-    const std::wstring plusFuncName1 = L"PlusFunc1";
-    const std::wstring plusFuncName2 = L"PlusFunc2";
-
-
-    auto inputVar1 = InputVariable({ inputDim }, DataType::Float, L"features");
-
-    auto inputPlaceholder1 = PlaceholderVariable(L"inputPlaceholder");
-    auto timesParam = CNTK::Parameter(CNTK::NDArrayView::RandomUniform<float>({ outputDim, inputDim }, -0.05, 0.05, 1, device));
-    auto timesFunc1 = CNTK::Times(timesParam, inputPlaceholder1, timesFuncName);
-    auto plusFunc1 = CNTK::Plus(Constant::Scalar(2.0f), timesFunc1, plusFuncName1);
-    auto plusFunc2 = CNTK::Plus(Constant::Scalar(2.0f), plusFunc1, plusFuncName2);
-    auto emptyNameFunc1 = CNTK::Plus(plusFunc1, plusFunc2);
-
-    auto foundFunction = FindAllWithOpType(emptyNameFunc1, CNTK::PrimitiveOpType::Plus, true);
-
-    CheckFindNameResultInSet(foundFunction, plusFuncName1);
-    CheckFindNameResultInSet(foundFunction, plusFuncName2);
-}
-
 void TestFindName(const DeviceDescriptor& device)
 {
     size_t inputDim = 10;
@@ -1152,12 +1111,6 @@ void SetRandomSeed(const DeviceDescriptor& device)
 }
 
 BOOST_AUTO_TEST_SUITE(FunctionSuite)
-
-BOOST_AUTO_TEST_CASE(PreoderTraverseInCPU)
-{
-    if (ShouldRunOnCpu())
-        TestPreorderTraverse(DeviceDescriptor::CPUDevice());
-}
 
 BOOST_AUTO_TEST_CASE(FindNameInCPU)
 {
