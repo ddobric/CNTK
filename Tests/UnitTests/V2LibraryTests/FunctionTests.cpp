@@ -6,7 +6,6 @@
 #include "CNTKLibrary.h"
 #include "Common.h"
 #include <numeric>
-#include "PrimitiveFunction.h"
 
 using namespace CNTK;
 
@@ -854,19 +853,6 @@ void CheckFindAllWithNameResult(std::vector<FunctionPtr> actual, std::wstring ex
                 ReportFailure("The found function '%S' does have the same name as the exepected one '%S'", actual[i]->Name().c_str(), expectedName.c_str());
         }
     }
-}
-
-void CheckFindNameResultInSet(std::vector<FunctionPtr> actual, std::wstring expectedName)
-{
-    bool check = false;
-    for (size_t i = 0; i < actual.size(); i++)
-    {
-        if (actual[i]->Name().compare(expectedName) == 0)
-            check = true;
-    }
-
-    if(!check)
-        ReportFailure("Cannot find function '%S'", expectedName.c_str());
 }
 
 void TestFindName(const DeviceDescriptor& device)
